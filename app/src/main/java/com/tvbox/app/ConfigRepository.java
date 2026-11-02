@@ -66,7 +66,7 @@ public final class ConfigRepository {
         return current;
     }
 
-    /** 读取内置示例配置（只包含公开、合法的测试源与自填模板）。 */
+/** 读取内置示例配置（只包含公开、合法的测试源与自填模板）。 */
     public ConfigLoader.Config loadBuiltIn() {
         InputStream in = null;
         try {
@@ -75,11 +75,24 @@ public final class ConfigRepository {
             ConfigLoader.Config cfg = ConfigLoader.parse(text);
             current = cfg;
             prefs.edit().putString(KEY_CACHE, text).putString(KEY_URL, "").apply();
+            CrashLogger.log("内置配置读取成功（assets）");
             return cfg;
-        } catch (IOException e) {
-            throw new RuntimeException("读取内置配置失败: " + e.getMessage());
-        } catch (RuntimeException e) {
-            throw new RuntimeException("内置配置校验失败: " + e.getMessage());
+        } catch (Throwable e) {
+            // assets 里没有这份文件（例如代码上传时漏了深层目录），
+            // 这时不能抛异常——否则用户看到的就是一个空界面。
+            // 改用代码硬编码的兜底配置，保证 App 能起来、能验证播放链路。
+            CrashLogger.log("assets 内置配置不可用，改用代码兜底: " + e.getMessage());
+            try {
+                String text = BuiltInConfig.json();
+                ConfigLoader.Config cfg = ConfigLoader.parse(text);
+                current = cfg;
+                prefs.edit().putString(KEY_CACHE, text).putString(KEY_URL, "").apply();
+                CrashLogger.log("代码兜底配置加载成功");
+                return cfg;
+            } catch (Throwable e2) {
+                CrashLogger.log("代码兜底配置也失败了", e2);
+                throw new RuntimeException("内置配置全部不可用: " + e2.getMessage());
+            }
         } finally {
             close(in);
         }
