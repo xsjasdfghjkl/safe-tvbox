@@ -1,0 +1,84 @@
+{
+  "sites": [
+    {
+      "key": "iptv_us",
+      "name": "公开IPTV-美国（m3u练手）",
+      "type": "decl",
+      "searchable": false,
+      "api": "https://iptv-org.github.io/iptv",
+      "rules": {
+        "home": {
+          "url": "${api}/countries/us.m3u",
+          "parse": "m3u",
+          "limit": 100
+        },
+        "category": {
+          "url": "${api}/countries/us.m3u",
+          "parse": "m3u",
+          "limit": 100
+        }
+      }
+    },
+    {
+      "key": "iptv_jp",
+      "name": "公开IPTV-日本（m3u练手）",
+      "type": "decl",
+      "searchable": false,
+      "api": "https://iptv-org.github.io/iptv",
+      "rules": {
+        "home": {
+          "url": "${api}/countries/jp.m3u",
+          "parse": "m3u",
+          "limit": 100
+        },
+        "category": {
+          "url": "${api}/countries/jp.m3u",
+          "parse": "m3u",
+          "limit": 100
+        }
+      }
+    },
+    {
+      "key": "nasa_video",
+      "name": "NASA公开影像库（JSON练手）",
+      "type": "decl",
+      "searchable": true,
+      "api": "https://images-api.nasa.gov",
+      "rules": {
+        "home": {
+          "url": "${api}/search?q=apollo&media_type=video",
+          "parse": "json",
+          "root": "$.collection.items",
+          "fields": {
+            "vod_id": "$.data[0].nasa_id",
+            "vod_name": "$.data[0].title",
+            "vod_content": "$.data[0].description",
+            "vod_pic": "$.links[0].href"
+          }
+        },
+        "category": {
+          "url": "${api}/search?q=apollo&media_type=video",
+          "parse": "json",
+          "root": "$.collection.items",
+          "fields": {
+            "vod_id": "$.data[0].nasa_id",
+            "vod_name": "$.data[0].title",
+            "vod_content": "$.data[0].description",
+            "vod_pic": "$.links[0].href"
+          }
+        },
+        "search": {
+          "url": "${api}/search?q=${wd|urlencode}&media_type=video",
+          "parse": "json",
+          "root": "$.collection.items",
+          "fields": {
+            "vod_id": "$.data[0].nasa_id",
+            "vod_name": "$.data[0].title",
+            "vod_content": "$.data[0].description",
+            "vod_pic": "$.links[0].href"
+          }
+        }
+      }
+    }
+  ]
+}
