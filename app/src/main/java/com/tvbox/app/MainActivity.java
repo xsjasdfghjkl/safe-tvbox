@@ -123,10 +123,16 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        // 从设置页返回时，配置可能已更换，重新加载一次
-        List<SiteConfig> fresh = App.repo().sites();
-        if (fresh.size() != sites.size()) {
-            loadConfig();
+        // 从设置页返回时，配置可能已更换，重新加载一次。
+        // 这里必须包 try-catch：sites() 可能触发首次读 assets + 解析配置，
+        // 一旦抛异常就是主线程崩溃（表现为"点开闪一下就没"），必须兜住。
+        try {
+            List<SiteConfig> fresh = App.repo().sites();
+            if (fresh.size() != sites.size()) {
+                loadConfig();
+            }
+        } catch (Throwable t) {
+            CrashLogger.log("onResume 重新加载配置失败", t);
         }
     }
 
