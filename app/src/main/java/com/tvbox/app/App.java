@@ -22,7 +22,19 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         sInstance = this;
-        repository = new ConfigRepository(this);
+
+        // 崩溃记录器要第一个装上：后面任何一步炸了都能留下线索
+        CrashLogger.install(this);
+        CrashLogger.log("=== App 启动 ===");
+        CrashLogger.logEnv();
+
+        try {
+            repository = new ConfigRepository(this);
+            CrashLogger.log("配置仓库初始化成功");
+        } catch (Throwable t) {
+            // 不重新抛出：配置挂了也要让界面起来并显示错误，而不是闪退
+            CrashLogger.log("配置仓库初始化失败", t);
+        }
     }
 
     public static App get() {
